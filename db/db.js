@@ -3,10 +3,16 @@ const bcrypt=require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 
-mongoose.connect("mongodb://0.0.0.0:27017/Veggies", { useNewUrlParser: true}).then(() => {
-    console.log("connection sucessful");
-}).catch((err) => {
-    console.log(err);
+const mdb = "mongodb+srv://suraj9801439605:Baibhav%409801@cluster0.buw5tri.mongodb.net/veggies?retryWrites=true&w=majority";
+// mongoose.connect("mongodb://0.0.0.0:27017/Veggies", { useNewUrlParser: true}).then(() => {
+//     console.log("connection sucessful");
+// }).catch((err) => {
+//     console.log(err);
+// })
+mongoose.connect(mdb).then(()=>{
+  console.log("connection success");
+}).catch((error)=>{
+    console.log(error);
 })
 
 //customer Db work ................
