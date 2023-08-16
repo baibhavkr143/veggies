@@ -9,7 +9,7 @@ const mdb = "mongodb+srv://suraj9801439605:Baibhav%409801@cluster0.buw5tri.mongo
 // }).catch((err) => {
 //     console.log(err);
 // })
-mongoose.connect(mdb).then(()=>{
+mongoose.connect(mdb,{ useNewUrlParser: true, useUnifiedTopology: true }).then(()=>{
   console.log("connection success");
 }).catch((error)=>{
     console.log(error);
