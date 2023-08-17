@@ -4,6 +4,9 @@ const bcrypt = require('bcrypt');
 const db = require('../db/db.js'); // Import your User model
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const env=require("dotenv");
+env.config({path:"../backend/config.env"});
+const password=process.env.password;
 
 function generateResetToken() {
   return crypto.randomBytes(20).toString('hex');
@@ -18,7 +21,7 @@ const transporter = nodemailer.createTransport({
   secureConnection:false,
   auth: {
     user: 'suraj9801439605@gmail.com',
-    pass: 'djnyrflezdoyywcq'
+    pass: password
   },
   tls: {
     rejectUnauthorized:true
