@@ -1,19 +1,23 @@
 const mongoose=require("mongoose");
 const bcrypt=require("bcrypt");
 const jwt = require("jsonwebtoken");
+const env=require("dotenv");
+
+env.config({ path: "../backend/config.env" });
 
 
-const mdb = "mongodb+srv://suraj9801439605:Baibhav%409801@cluster0.buw5tri.mongodb.net/veggies?retryWrites=true&w=majority";
-// mongoose.connect("mongodb://0.0.0.0:27017/Veggies", { useNewUrlParser: true}).then(() => {
-//     console.log("connection sucessful");
-// }).catch((err) => {
-//     console.log(err);
-// })
+const mdb=process.env.DataBase;
 mongoose.connect(mdb,{ useNewUrlParser: true, useUnifiedTopology: true }).then(()=>{
   console.log("connection success");
 }).catch((error)=>{
     console.log(error);
 })
+
+// mongoose.connect("mongodb://0.0.0.0:27017/Veggies", { useNewUrlParser: true}).then(() => {
+//     console.log("connection sucessful");
+// }).catch((err) => {
+//     console.log(err);
+// })
 
 //customer Db work ................
 const signUpSchema=new mongoose.Schema({
