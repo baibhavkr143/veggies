@@ -35,12 +35,13 @@ const signUpSchema=new mongoose.Schema({
         required:true,
         
     },
-    conformPassword:{
+    confirmPassword:{
       type:String,
       required:true,
     },
     resetToken:String,
-    resetTokenExpiry:Date
+    resetTokenExpiry:Date,
+    image:Buffer
 })
 signUpSchema.methods.createToken=async function(){
     try {
@@ -80,7 +81,7 @@ const sellerLoginSchema=new mongoose.Schema({
         required:true,
         
     },
-    conformPassword:{
+    confirmPassword:{
       type:String,
       required:true,
     },
@@ -156,7 +157,11 @@ const addCartSchema= new mongoose.Schema({
     },
     name :{
        type:String
-    }
+    },
+    quantity:Number,
+    price:Number,
+    description:String,
+    image:String
 });
 
 addCartSchema.index({ email_customer: 1, name: 1 }, { unique: true });

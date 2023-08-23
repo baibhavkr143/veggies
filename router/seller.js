@@ -242,7 +242,7 @@ router_seller.post("/seller/products/deleteProduct", async (req, res) => {
 // Product Api of sellers
 router_seller.get("/seller/products", async (req, res) => {
   try {
-    if (product_data.length == 0)
+     if (product_data.length == 0)
       product_data = await db.seller_products.find().sort();
     res.status(200).send(product_data);
   } catch (error) {

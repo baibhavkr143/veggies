@@ -19,7 +19,7 @@ router_customer.post("/customer/register", async (req, res) => {
     const email = data.email;
     val=await db.signUpDetails.findOne({ email: email });
     if (val){
-      res.status(400).send("email already exists");
+      res.status(400).json({mesage:"email already exists"});
     } else {
       const new_doc = new db.signUpDetails(data);
       const result = await new_doc.save();
@@ -28,7 +28,7 @@ router_customer.post("/customer/register", async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).send(error);
+    res.status(400).send(error.message);
   }
 });
 
@@ -48,7 +48,7 @@ router_customer.post("/customer/login", async (req, res) => {
         });
         res.status(200).json({message:"login sucess......"});
       } else res.status(400).json({message:"login fails"});
-    } else res.status(400).send({message:"login fails....."});
+    } else res.status(400).send({message:"email not found"});
   } catch (error) {
     console.log(error);
     res.status(400).send(error);
