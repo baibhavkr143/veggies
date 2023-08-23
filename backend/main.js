@@ -1,4 +1,5 @@
 const express = require("express");
+require("../db/orders.js");
 const app = express();
 const env=require("dotenv");
 env.config({path:"../backend/config.env"});
@@ -7,6 +8,8 @@ app.use(require("../router/customer.js"));
 app.use(require("../router/seller.js"));
 app.use(require("../router/customeForgotPassword.js"));
 app.use(require("../router/sellerForgotPassword.js"));
+app.use(require("../router/order.js"));
+
 app.get("/", (req, res) => {
   res.send("Hello, world!");
 });

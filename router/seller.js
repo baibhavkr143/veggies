@@ -24,7 +24,7 @@ router_seller.post("/seller/register", async (req, res) => {
       const new_doc = new db.seller_login(data);
       const result = await new_doc.save();
       if (result) console.log("data saved sucessfully....");
-      res.status(200).json({message:"data added sucessfully..."});
+      res.status(200).json({ message: "data added sucessfully..." });
     }
   } catch (error) {
     console.log(error);
@@ -46,9 +46,9 @@ router_seller.post("/seller/login", async (req, res) => {
           expires: new Date(Date.now() + 10000 * 60000),
           httpOnly: true,
         });
-        res.status(200).json({message:"login sucess......"});
-      } else res.status(400).json({message:"login fails"});
-    } else res.status(400).json({message:"login fails....."});
+        res.status(200).json({ message: "login sucess......" });
+      } else res.status(400).json({ message: "login fails" });
+    } else res.status(400).json({ message: "login fails....." });
   } catch (error) {
     console.log(error);
     res.status(400).send(error);
@@ -57,7 +57,7 @@ router_seller.post("/seller/login", async (req, res) => {
 //logOut
 router_seller.get("/seller/logout", (req, res) => {
   res.clearCookie("loginSellerCookie");
-  res.status(200).json({message:"logOut is sucess.....seller side ....."});
+  res.status(200).json({ message: "logOut is sucess.....seller side ....." });
 });
 
 //update the password field of seller when current password matches the password on the server
@@ -98,24 +98,24 @@ router_seller.get("/seller/details", async (req, res) => {
 });
 
 //api for getting details of particular sellers
-const memoizeSellerLogin={
-   cache:new Map(),
-   async get(email){
-     if(memoizeSellerLogin.cache.has(email)){
-       return memoizeSellerLogin.cache.get(email);
-     }
-     try {
-      const data = await db.seller_login.findOne({email});
-      memoizeSellerLogin.cache.set(email,data);
+const memoizeSellerLogin = {
+  cache: new Map(),
+  async get(email) {
+    if (memoizeSellerLogin.cache.has(email)) {
+      return memoizeSellerLogin.cache.get(email);
+    }
+    try {
+      const data = await db.seller_login.findOne({ email });
+      memoizeSellerLogin.cache.set(email, data);
       return data;
-     } catch (error) {
-        throw error;
-     }
-   },
-   invalidateSellerLogin(email){
-        memoizeSellerLogin.cache.delete(email);
-   }
-}
+    } catch (error) {
+      throw error;
+    }
+  },
+  invalidateSellerLogin(email) {
+    memoizeSellerLogin.cache.delete(email);
+  },
+};
 router_seller.get("/seller/details/:email", async (req, res) => {
   try {
     const email = req.params.email;
@@ -127,8 +127,6 @@ router_seller.get("/seller/details/:email", async (req, res) => {
   }
 });
 
-
-
 //registration of products..........................................
 var product_data = [];
 router_seller.post("/seller/RegisterProduct", async (req, res) => {
@@ -138,7 +136,7 @@ router_seller.post("/seller/RegisterProduct", async (req, res) => {
     const name = data.name;
     const product = await db.seller_products.findOne({ email, name });
     if (product) {
-      res.status(400).json({message:"product already exist"});
+      res.status(400).json({ message: "product already exist" });
     } else {
       const new_doc = new db.seller_products(data);
       const result = await new_doc.save();
@@ -156,31 +154,78 @@ router_seller.post("/seller/RegisterProduct", async (req, res) => {
 });
 
 //code for update of remainingQuantity of product when customer buy the product
+// router_seller.post(
+//   "/seller/products/updateRemainingQuantity",
+//   async (req, res) => {
+//     try {
+//       const data = req.body;
+//       const email = data.email;
+//       const name = data.name;
+//       const QuantitySold = data.QuantitySold;
+//       const product = await db.seller_products.findOne({ email, name });
+//       if (product) {
+//         if (product.remainQuantity >= QuantitySold) {
+//           const result = await db.seller_products.findOneAndUpdate(
+//             { email, name },
+//             { $set: { remainQuantity: product.remainQuantity - QuantitySold } }
+//           );
+//           res.status(200).send(result);
+//           memoizedGetSellerProducts.invalidate(email);
+//           memoizeProductName.invalidateCache(name);
+//           product_data = [];
+//           memoizeFilterProduct.invalidateCache();
+//           console.log(result);
+//         }else res.status(400).json({message:"product is sold out"});
+//       } else {
+//         res.status(400).json({ message: "product does not exist" });
+//       }
+//     } catch (error) {
+//       res.send(`error is in seller update remaining quantity ${error.message}`);
+//     }
+//   }
+// );
 router_seller.post(
   "/seller/products/updateRemainingQuantity",
   async (req, res) => {
+    const session = await db.mongoose.startSession();
+    session.startTransaction();
     try {
       const data = req.body;
       const email = data.email;
       const name = data.name;
       const QuantitySold = data.QuantitySold;
-      const product = await db.seller_products.findOne({ email, name });
+
+      // Use session with transaction for database operations
+      const product = await db.seller_products.findOne({ email, name }).session(session);
+
       if (product) {
-        const result = await db.seller_products.findOneAndUpdate(
-          { email, name },
-          { $set: { remainQuantity: product.remainQuantity - QuantitySold } }
-        );
-        res.status(200).send(result);
-        memoizedGetSellerProducts.invalidate(email);
-        memoizeProductName.invalidateCache(name);
-        product_data = [];
-        memoizeFilterProduct.invalidateCache();
-        console.log(result);
+        if (product.remainQuantity >= QuantitySold) {
+          const result = await db.seller_products.findOneAndUpdate(
+            { email, name },
+            { $set: { remainQuantity: product.remainQuantity - QuantitySold } },
+            { session }
+          );
+          await session.commitTransaction();
+
+          res.status(200).send(result);
+          memoizedGetSellerProducts.invalidate(email);
+          memoizeProductName.invalidateCache(name);
+          product_data = [];
+          memoizeFilterProduct.invalidateCache();
+          console.log(result);
+        } else {
+          await session.abortTransaction();
+          res.status(400).json({ message: "Product is sold out" });
+        }
       } else {
-        res.status(400).json({message:"product does not exist"});
+        await session.abortTransaction();
+        res.status(400).json({ message: "Product does not exist" });
       }
     } catch (error) {
-      res.send(`error is in seller update remaining quantity ${error.message}`);
+      await session.abortTransaction();
+      res.status(500).send(`Error in seller update remaining quantity: ${error.message}`);
+    } finally {
+      session.endSession();
     }
   }
 );
@@ -192,7 +237,7 @@ router_seller.post("/seller/products/addQuantity", async (req, res) => {
     const email = data.email;
     const name = data.name;
     const addedQuantity = parseInt(data.addedQuantity);
-    
+
     const product = await db.seller_products.findOne({ email, name });
     if (product) {
       const result = await db.seller_products.findOneAndUpdate(
@@ -200,17 +245,17 @@ router_seller.post("/seller/products/addQuantity", async (req, res) => {
         {
           $set: {
             totalQuantity: product.totalQuantity + addedQuantity,
-            remainQuantity: product.remainQuantity + addedQuantity
-          }
+            remainQuantity: product.remainQuantity + addedQuantity,
+          },
         }
       );
       memoizedGetSellerProducts.invalidate(email);
-        memoizeProductName.invalidateCache(name);
-        product_data = [];
-        memoizeFilterProduct.invalidateCache();
+      memoizeProductName.invalidateCache(name);
+      product_data = [];
+      memoizeFilterProduct.invalidateCache();
       res.status(200).send(result);
-    }
-    else res.status(404).json({message: 'Product doesnot exist for update'});
+    } else
+      res.status(404).json({ message: "Product doesnot exist for update" });
   } catch (error) {
     res.status(404).json({ message: error.message });
     console.log(`error is in adding more quantity of product ${error.message}`);
@@ -232,7 +277,7 @@ router_seller.post("/seller/products/deleteProduct", async (req, res) => {
       memoizeFilterProduct.invalidateCache();
       res.status(200).send(result);
     } else {
-      res.status(400).json({message:"product does not exist"});
+      res.status(400).json({ message: "product does not exist" });
     }
   } catch (error) {
     res.status(400).send(`error is in seller delete product ${error.message}`);
@@ -242,7 +287,7 @@ router_seller.post("/seller/products/deleteProduct", async (req, res) => {
 // Product Api of sellers
 router_seller.get("/seller/products", async (req, res) => {
   try {
-     if (product_data.length == 0)
+    if (product_data.length == 0)
       product_data = await db.seller_products.find().sort();
     res.status(200).send(product_data);
   } catch (error) {
@@ -253,7 +298,7 @@ router_seller.get("/seller/products", async (req, res) => {
 
 //product api of particular seller with memoization
 const memoizedGetSellerProducts = (() => {
-   cache = new Map();
+  cache = new Map();
 
   return {
     async get(email) {
@@ -283,8 +328,7 @@ router_seller.get("/seller/products/:email", async (req, res) => {
   try {
     const email = req.params.email;
     const particluarProductData = await memoizedGetSellerProducts.get(email);
-    if(particluarProductData)
-    res.status(200).send(particluarProductData);
+    if (particluarProductData) res.status(200).send(particluarProductData);
     else {
       res.status(400).json({ message: "Product not found" });
     }

@@ -171,4 +171,5 @@ const cartData=new  mongoose.model("CartData",addCartSchema);
 module.exports.signUpDetails=signUpDetails;
 module.exports.seller_login=seller_login;
 module.exports.seller_products=seller_products;
-module.exports.cartData=cartData;  
+module.exports.cartData=cartData; 
+module.exports.mongoose=mongoose; 
