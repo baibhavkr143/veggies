@@ -3,17 +3,20 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const db = require("../db/db.js");
 const cookieParser = require("cookie-parser");
+const multer= require("multer");
 const auth = require("../backend/middleWareSeller.js");
 const router_seller = express.Router();
 
 router_seller.use(cookieParser());
+const storage = multer.memoryStorage(); 
+const upload = multer({ storage: storage });
 
 router_seller.get("/seller/home", auth, (req, res) => {
   res.status(200).send("hello from seller side!");
 });
 
 //register user
-router_seller.post("/seller/register", async (req, res) => {
+router_seller.post("/seller/register",upload.single("ProfilePhoto"), async (req, res) => {
   try {
     const data = req.body;
     const email = data.email;
@@ -22,6 +25,11 @@ router_seller.post("/seller/register", async (req, res) => {
       res.status(400).send("user already exists");
     } else {
       const new_doc = new db.seller_login(data);
+      if(req.file)
+      {
+        new_doc.photo.data=req.file.buffer;
+        new_doc.photo.contentType=req.file.mimetype;
+      }
       const result = await new_doc.save();
       if (result) console.log("data saved sucessfully....");
       res.status(200).json({ message: "data added sucessfully..." });
@@ -129,7 +137,7 @@ router_seller.get("/seller/details/:email", async (req, res) => {
 
 //registration of products..........................................
 var product_data = [];
-router_seller.post("/seller/RegisterProduct", async (req, res) => {
+router_seller.post("/seller/RegisterProduct", upload.single("ProductPhoto"),async (req, res) => {
   try {
     const data = req.body;
     const email = data.email;
@@ -139,6 +147,11 @@ router_seller.post("/seller/RegisterProduct", async (req, res) => {
       res.status(400).json({ message: "product already exist" });
     } else {
       const new_doc = new db.seller_products(data);
+      if(req.file)
+      {
+        new_doc.photo.data=req.file.buffer;
+        new_doc.photo.contentType=req.file.mimetype;
+      }
       const result = await new_doc.save();
       res.status(200).send(result);
       console.log(result);
@@ -153,37 +166,7 @@ router_seller.post("/seller/RegisterProduct", async (req, res) => {
   }
 });
 
-//code for update of remainingQuantity of product when customer buy the product
-// router_seller.post(
-//   "/seller/products/updateRemainingQuantity",
-//   async (req, res) => {
-//     try {
-//       const data = req.body;
-//       const email = data.email;
-//       const name = data.name;
-//       const QuantitySold = data.QuantitySold;
-//       const product = await db.seller_products.findOne({ email, name });
-//       if (product) {
-//         if (product.remainQuantity >= QuantitySold) {
-//           const result = await db.seller_products.findOneAndUpdate(
-//             { email, name },
-//             { $set: { remainQuantity: product.remainQuantity - QuantitySold } }
-//           );
-//           res.status(200).send(result);
-//           memoizedGetSellerProducts.invalidate(email);
-//           memoizeProductName.invalidateCache(name);
-//           product_data = [];
-//           memoizeFilterProduct.invalidateCache();
-//           console.log(result);
-//         }else res.status(400).json({message:"product is sold out"});
-//       } else {
-//         res.status(400).json({ message: "product does not exist" });
-//       }
-//     } catch (error) {
-//       res.send(`error is in seller update remaining quantity ${error.message}`);
-//     }
-//   }
-// );
+
 router_seller.post(
   "/seller/products/updateRemainingQuantity",
   async (req, res) => {

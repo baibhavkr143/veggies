@@ -89,7 +89,11 @@ const sellerLoginSchema=new mongoose.Schema({
       required:true,
     },
     resetToken:String,
-    resetTokenExpiry:Date
+    resetTokenExpiry:Date,
+    photo: {
+        data: Buffer, // Store binary data of the image
+        contentType: String // Store the content type of the image (e.g., "image/jpeg", "image/png")
+      }
 });
 sellerLoginSchema.methods.createToken=async function(){
     try {
@@ -126,9 +130,10 @@ const sellerProductSchema=new mongoose.Schema({
         type:String,
         required:true
     },
-    image:{
-        type:String
-    },
+    photo: {
+        data: Buffer, // Store binary data of the image
+        contentType: String // Store the content type of the image (e.g., "image/jpeg", "image/png")
+      },
     category:{
         type:String,
         required:true
@@ -164,7 +169,10 @@ const addCartSchema= new mongoose.Schema({
     quantity:Number,
     price:Number,
     description:String,
-    image:String
+    photo: {
+        data: Buffer, // Store binary data of the image
+        contentType: String // Store the content type of the image (e.g., "image/jpeg", "image/png")
+      }
 });
 
 addCartSchema.index({ email_customer: 1, name: 1 }, { unique: true });
