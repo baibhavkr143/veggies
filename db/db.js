@@ -41,7 +41,10 @@ const signUpSchema=new mongoose.Schema({
     },
     resetToken:String,
     resetTokenExpiry:Date,
-    image:Buffer
+    photo: {
+        data: Buffer, // Store binary data of the image
+        contentType: String // Store the content type of the image (e.g., "image/jpeg", "image/png")
+      }
 })
 signUpSchema.methods.createToken=async function(){
     try {
