@@ -14,6 +14,12 @@ const upload = multer({ storage: storage });
 router_seller.get("/seller/home", auth, (req, res) => {
   res.status(200).send("hello from seller side!");
 });
+router_seller.get("/seller/register", auth, (req, res) => {
+  res.status(200).send("hello from receiver side!");
+})
+router_seller.get("/seller/viewProducts", auth, (req, res) => {
+  res.status(200).send("hello from viewProduct");
+});
 
 //register user
 router_seller.post("/seller/register",upload.single("ProfilePhoto"), async (req, res) => {
