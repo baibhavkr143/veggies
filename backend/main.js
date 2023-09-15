@@ -6,13 +6,6 @@ const env=require("dotenv");
 env.config({path:"../backend/config.env"});
 
 app.use(cors({ origin: 'https://vegitablemarketlogs.onrender.com' }));
-app.use(cors({ origin: 'http://localhost:3001' }));
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001');
-  // You can also configure other CORS headers as needed
-  // ...
-  next();
-});
 app.use(express.json());
 app.use(require("../router/customer.js"));
 app.use(require("../router/seller.js"));
