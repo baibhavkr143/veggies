@@ -12,6 +12,7 @@ app.use(require("../router/seller.js"));
 app.use(require("../router/customeForgotPassword.js"));
 app.use(require("../router/sellerForgotPassword.js"));
 app.use(require("../router/order.js"));
+app.use(require("../router/payment_gateway.js"));
 
 app.get("/", (req, res) => {
   res.send("Hello, world!");
