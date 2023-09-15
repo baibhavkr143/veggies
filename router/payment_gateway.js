@@ -4,7 +4,7 @@ env.config({ path: "../backend/config.env" });
 const stripe= require('stripe')(process.env.secret_key);
 const router=express.Router();
 //code for accepting payment using stripe
-router.post('/create-payment-intent', async (req, res) => {
+router.post('/customer/paymet', async (req, res) => {
     try {
       const { amount, currency } = req.body;
   

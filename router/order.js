@@ -10,7 +10,7 @@ router.post("/customer/order",async (req,res)=>{
         const data=req.body;
         const document= new db.orders(data);
         const result=document.save();
-        if(result)res.status(200).json({message:result});
+        if(result)res.status(200).json({message:"sucess"});
     } catch (error) {
         console.log(error.message);
         res.status(400).send(error);
