@@ -153,8 +153,8 @@ router_seller.post("/seller/RegisterProduct", upload.single("ProductPhoto"),asyn
         new_doc.photo.contentType=req.file.mimetype;
       }
       const result = await new_doc.save();
-      res.status(200).send(result);
-      console.log(result);
+      res.status(200).json({message:"success in adding product"});
+      //console.log(result);
       //memozie of work
       memoizedGetSellerProducts.invalidate(email);
       memoizeProductName.invalidateCache(name);

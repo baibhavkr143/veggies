@@ -26,7 +26,7 @@ const memoizeOrderCus={
            if(this.cache.has(email))
            return this.cache.get(email);
             
-           const data=await db.findOne({email_customer:email});
+           const data=await db.orders.find({email_customer:email});
            if(data)
            this.cache.set(email,data);
             
@@ -61,7 +61,7 @@ const memoizeOrderSeller={
            if(this.cache.has(email))
            return this.cache.get(email);
             
-           const data=await db.findOne({email_seller:email});
+           const data=await db.orders.find({email_seller:email});
            if(data)
            this.cache.set(email,data);
             
