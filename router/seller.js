@@ -148,7 +148,7 @@ router_seller.post("/seller/RegisterProduct", upload.single("ProductPhoto"),asyn
     const data = req.body;
     const email = data.email;
     const name = data.name;
-    console.log(data);
+    console.log(req.file);
     const product = await db.seller_products.findOne({ email, name });
     if (product) {
       res.status(400).json({ message: "product already exist" });
