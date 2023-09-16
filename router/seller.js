@@ -155,7 +155,8 @@ router_seller.post("/seller/RegisterProduct",async (req, res) => {
       //console.log(result);
       //memozie of work
       memoizedGetSellerProducts.invalidate(email);
-      memoizeProductName.invalidateCache(name);
+      var key=name+"*"+email;
+      memoizeProductName.invalidateCache(key);
       product_data = [];
       memoizeFilterProduct.invalidateCache();
     }
@@ -190,7 +191,8 @@ router_seller.post(
 
           res.status(200).send(result);
           memoizedGetSellerProducts.invalidate(email);
-          memoizeProductName.invalidateCache(name);
+          var key=name+"*"+email;
+          memoizeProductName.invalidateCache(key);
           product_data = [];
           memoizeFilterProduct.invalidateCache();
           console.log(result);
@@ -231,7 +233,8 @@ router_seller.post("/seller/products/addQuantity", async (req, res) => {
         }
       );
       memoizedGetSellerProducts.invalidate(email);
-      memoizeProductName.invalidateCache(name);
+      var key=name+"*"+email;
+      memoizeProductName.invalidateCache(key);
       product_data = [];
       memoizeFilterProduct.invalidateCache();
       res.status(200).send(result);
@@ -253,7 +256,8 @@ router_seller.post("/seller/products/deleteProduct", async (req, res) => {
     if (product) {
       const result = await db.seller_products.findOneAndDelete({ email, name });
       memoizedGetSellerProducts.invalidate(email);
-      memoizeProductName.invalidateCache(name);
+      var key=name+"*"+email;
+      memoizeProductName.invalidateCache(key);
       product_data = [];
       memoizeFilterProduct.invalidateCache();
       res.status(200).send(result);
@@ -325,14 +329,15 @@ router_seller.get("/seller/products/:email", async (req, res) => {
 //api for particular name like apple ,banana,etc.......
 const memoizeProductName = {
   cache: new Map(),
-  async get(name) {
-    if (memoizeProductName.cache.has(name)) {
-      return memoizeProductName.cache.get(name);
+  async get(name,email) {
+    var key=name+"*"+email;
+    if (memoizeProductName.cache.has(key)) {
+      return memoizeProductName.cache.get(key);
     }
     try {
-      const product = await db.seller_products.find({ name });
+      const product = await db.seller_products.findOne({email,name });
       if (product) {
-        memoizeProductName.cache.set(name, product);
+        memoizeProductName.cache.set(key, product);
         return product;
       }
       return null;
@@ -340,15 +345,16 @@ const memoizeProductName = {
       throw error; // Rethrow the error to be caught by the route handler
     }
   },
-  invalidateCache(name) {
-    memoizeProductName.cache.delete(name);
+  invalidateCache(key) {
+    memoizeProductName.cache.delete(key);
   },
 };
 
-router_seller.get("/seller/products/Pname/:name", async (req, res) => {
+router_seller.post("/seller/products/particularProduct", async (req, res) => {
   try {
-    const name = req.params.name;
-    const product = await memoizeProductName.get(name);
+    const name = req.body.name;
+    const email = req.body.email;
+    const product = await memoizeProductName.get(name,email);
 
     if (product) {
       res.status(200).send(product);
