@@ -18,21 +18,16 @@ router_customer.get("/customer/home", auth, (req, res) => {
 });
 
 //register user
-router_customer.post("/customer/register",upload.single("photo"), async (req, res) => {
+router_customer.post("/customer/register", async (req, res) => {
   try {
     const data = req.body;
     const email = data.email;
-    const photo=req.file;
+
     val=await db.signUpDetails.findOne({ email: email });
     if (val){
       res.status(400).json({mesage:"email already exists"});
     } else {
       const new_doc = new db.signUpDetails(data);
-      if(photo)
-      {
-        new_doc.photo.data=photo.buffer;
-        new_doc.photo.contentType=photo.mimetype;
-      }
       const result = await new_doc.save();
       if (result) console.log("data saved sucessfully....");
       res.status(200).json({message:"data saved sucessfully...."});

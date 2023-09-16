@@ -22,7 +22,7 @@ router_seller.get("/seller/viewProducts", auth, (req, res) => {
 });
 
 //register user
-router_seller.post("/seller/register",upload.single("ProfilePhoto"), async (req, res) => {
+router_seller.post("/seller/register", async (req, res) => {
   try {
     const data = req.body;
     const email = data.email;
@@ -31,11 +31,6 @@ router_seller.post("/seller/register",upload.single("ProfilePhoto"), async (req,
       res.status(400).send("user already exists");
     } else {
       const new_doc = new db.seller_login(data);
-      if(req.file)
-      {
-        new_doc.photo.data=req.file.buffer;
-        new_doc.photo.contentType=req.file.mimetype;
-      }
       const result = await new_doc.save();
       if (result) console.log("data saved sucessfully....");
       res.status(200).json({ message: "data added sucessfully..." });
@@ -143,23 +138,20 @@ router_seller.get("/seller/details/:email", async (req, res) => {
 
 //registration of products..........................................
 var product_data = [];
-router_seller.post("/seller/RegisterProduct", upload.single("ProductPhoto"),async (req, res) => {
+router_seller.post("/seller/RegisterProduct",async (req, res) => {
   try {
     const data = req.body;
     const email = data.email;
     const name = data.name;
+    console.log(req.file);
     const product = await db.seller_products.findOne({ email, name });
     if (product) {
       res.status(400).json({ message: "product already exist" });
     } else {
       const new_doc = new db.seller_products(data);
-      if(req.file)
-      {
-        new_doc.photo.data=req.file.buffer;
-        new_doc.photo.contentType=req.file.mimetype;
-      }
       const result = await new_doc.save();
       res.status(200).json({message:"success in adding product"});
+      console.log(result);
       //console.log(result);
       //memozie of work
       memoizedGetSellerProducts.invalidate(email);
