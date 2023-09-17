@@ -164,6 +164,7 @@ router_customer.post("/customer/deleteCart",async (req,res)=>{
       const email_customer=req.body.email;
       const name=req.body.name;
       const result=await db.cartData.findOneAndDelete({email_customer:email_customer,name:name});
+      memoizeCart.invalidate(data.email_customer);
       if(result){
         res.status(200).json({message:"data deleted successfully"});
         memoizeCart.invalidate(email_customer);
