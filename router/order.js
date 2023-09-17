@@ -11,6 +11,8 @@ router.post("/customer/order",async (req,res)=>{
         const document= new db.orders(data);
         const result=document.save();
         if(result)res.status(200).json({message:"sucess in order"});
+        memoizeOrderCus.invalidate(data.email_customer);
+        memoizeOrderSeller.invalidate(data.email_seller);
     } catch (error) {
         console.log(error.message);
         res.status(400).send(error);
