@@ -7,7 +7,6 @@ env.config({path:"../backend/config.env"});
 
 app.use(cors({ origin: 'https://vegitablemarketlogs.onrender.com' }));
 app.use(cors({ origin: 'http://localhost:3000' }));
-app.use(cors({ origin: 'https://veggies-seller.onrender.com' }));
 app.use(express.json());
 app.use(require("../router/customer.js"));
 app.use(require("../router/seller.js"));
